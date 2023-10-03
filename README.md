@@ -9,7 +9,7 @@ The algorithm was written using the XMLParser php library, which is capable of p
 The implementation is Object-oriented, so in order to split the files, an instance of Chunker has to be created first.
 
 An example of a simple Chunker instance without validation, with **maximum 100 main tags**/chunk, and with outputfile names of *"out-{CHUNK}.xml"*:
-```
+```php
 $chunkSize = 100;
 $outputFilePrefix = "out-";
 $xmlfile = "bigFile.xml";
@@ -38,7 +38,7 @@ If any of the required parameters are empty/not specified, a Fatal error will be
 ### Launch the chunking!
 
 After you created an instance of Chunker, and all the parameters were set, you can start the chunking process. You can do this with the `Chunker::chunkXML` method. An example is shown below:
-```
+```php
 // ... the instance is created in $chunker
 $chunker.chunkXML("item", "root");
 ```
@@ -50,7 +50,7 @@ THe method returns the logging session's string conversion (see below for more i
 ## Logging
 
 The class has an implemented logging feature. Everytime the `Chunker::chunkXML` is run, a new logging session is launched, which can be retrieved with the very same function. After its run, it returns the logging session converted into string:
-```
+```php
 // ... 
 $log = $chunker.chunkXML(....);
 echo $log;
@@ -71,7 +71,7 @@ It is really helpful, when something is not working for your needs, and has to b
 
 Lets say, that you have an XML file (*"feed.xml"*) with a **Shop** root element, and multiple **shopItem** elements inside it (10.000+). You want it to split into files named *"feed-{chunk}.xml"* containing 1000 **shopItem**s maximum. And you also want to only include **shopItem**s, that has a *weight_kg* tag inside, which can only be greater than 10 (or '10 kgs'). The solution is like the following:
 
-```
+```php
 $chunkSize = 1000;
 $xmlfile = "feed.xml";
 $outPrefix = "feed-";
