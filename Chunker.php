@@ -5,28 +5,120 @@ if(!class_exists("Chunker")){
     /**
      * A lightweight, fast, and optimized XML file splitter with build in tag data validation, written with the XMLParser library. The main goal of this is to split an XML file into multiple small chunks (hence the name), then save it into multiple different little XML files, so that slower servers, plugins etc can process XML files with more than even 10.000+ records. It is built on XMLParser, a powerful php xml processing library. 
      * 
+     * MINIMUM PHP VERSION: 7.4
+     * 
      * @author Borsodi Gergő
      * @version 1.0
+     * 
      */
     class Chunker{
 
+        /**
+         * The name of the file to be processed.
+         * @var string
+         */
         private string $xmlFile;
+
+        /**
+         * The maximum chunksize.
+         * @var int
+         */
         private int $chunkSize;
+
+        /**
+         * Counter for the chunks.
+         * @var int
+         */
         private int $CHUNKS;
+
+        /**
+         * The data that will be written into a chunk.
+         * @var string
+         */
         private string $PAYLOAD = '';
+
+        /**
+         * The data used for one iteration of the main tag.
+         * @var string
+         */
         private string $PAYLOAD_TEMP = '';
+
+        /**
+         * A container used to implement validation.
+         * @var
+         */
         private string $DATA_BETWEEN = '';
+
+        /**
+         * The root tag of the yet-to-process xml file.
+         * @var string
+         */
         private string $rootTag;
+
+        /**
+         * The charset used for the decoding/encoding process.
+         * @var string
+         */
         private string $CHARSET;
+
+        /**
+         * The prefix used for the output files.
+         * @var string
+         */
         private string $outputFilePrefix;
+
+        /**
+         * Counter for the items put into one chunk.
+         * @var int
+         */
         private int $ITEMCOUNT = 0;
+
+        /**
+         * The main tag, of which defines one item in the chunking.
+         * @var string
+         */
         private string $CHUNKON;
+
+        /**
+         * A variable used for logging.
+         * @var string
+         */
         private string $log = "";
+
+        /**
+         * The total number of processed main tags.
+         * @var int
+         */
         private int $totalItems = 0;
+
+        /**
+         * A variable that indicates if a maintag that doesn't satisfy the validation has been found.
+         * @var bool
+         */
         private bool $excludedItemFound = false;
+
+        /**
+         * A variable to indicate that the next data that will be read, has to be validated since its opening tag is present in $checkingTags.
+         * @var bool         
+         */
         private bool $checkNextData = false;
+
+        /**
+         * A variable that carries the tagname of the data that is about to be validated.
+         * @var string
+         */
         private string $checkNextDataTag = '';
+
+        /**
+         * An array of tags, where their data has to be validated runtime.
+         * @var array
+         */
         private array $checkingTags = array();
+
+        /**
+         * A callback function, that processes the validation. Has to be a callable.
+         * @var callable
+         */
         private $passesValidation;
 
         /**
@@ -199,7 +291,7 @@ if(!class_exists("Chunker")){
          * A funcion to start the chunking process. It will initiate the parsint instance, and start the XML parsing, along with the chunking of the data in every specified $chunkSize intervals.
          * @param string $mainTag The tag of which will be used to count the number of main elements in a chunk. Usually the second-level XML tag in a document.
          * @param string $rootTag The root tag of which every other $mainTag is the children of. There is only one of this in an XML document (not the XML header, which is in the first row).
-         * @param string $charset The character set used by the parser. **Default: UTF-8**
+         * @param string $charset The character set used by the parser. **Default: UTF-8** Possible values: "UTF-8", "ISO-8859-1"
          * 
          * @return string The main log that was created during the chunking
          */
