@@ -158,6 +158,7 @@ if(!class_exists("Chunker")){
                 return;
             }
             $xp = fopen($file = $this->outputFilePrefix . "" . $this->CHUNKS . ".xml", "w");
+            /*fwrite($xp, '<?xml version="1.0" encoding="'.$this->CHARSET.'"?>'."\n");*/
             fwrite($xp, '<?xml version="1.0" encoding="'.strtolower($this->CHARSET).'"?>'."\n");
                 fwrite($xp, '<'.$this->rootTag.' xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">');
                     fwrite($xp, $this->PAYLOAD);
@@ -181,12 +182,25 @@ if(!class_exists("Chunker")){
          * @param array $attrs An array of attributes of the tag. We dont use it here, so it is only there for syntax purposes
          */
         private function startElement($xml, $tag, $attrs = array()) {
+            //GLOBAL $PAYLOAD, $CHUNKS, $ITEMCOUNT, $CHUNKON;
+            //$this->logging("New tag element: " .$tag);
+            /*if (!($this->CHUNKS||$this->ITEMCOUNT)) {
+                if ($this->CHUNKON == $tag) {
+                    $this->PAYLOAD = '';
+                }
+            }*/
+            //if ("weight_kg" == $tag || "categoryText" == $tag || "product" == $tag || "serie" == $tag) {
             if(in_array($tag, $this->checkingTags)){
                 // checkable tag found
                 $this->checkNextData = true;
                 $this->checkNextDataTag = $tag;
             }
+            //$this->PAYLOAD .= "<{$tag}";
             $this->PAYLOAD_TEMP .= "<{$tag}>";
+            /*foreach($attrs as $k => $v) {
+                $this->PAYLOAD .= " {$k}=\"" .addslashes($v).'"';
+            }*/
+            //$this->PAYLOAD .= '>';
         }
 
         /**
@@ -195,14 +209,18 @@ if(!class_exists("Chunker")){
          * @param string $tag the currently parsed tag
          */
         private function endElement($xml, $tag) {
+            //GLOBAL $CHUNKON, $ITEMCOUNT, $ITEMLIMIT;
+            //$this->logging("New closing element: " .$tag);
             if($this->checkNextData && $this->checkNextDataTag == $tag){
                 // ezt az adatot validalni kell
+                //if(!$this->passesValidation($data, $this->checkNextDataTag)) $this->excludedItemFound = true;
                 if(!call_user_func($this->passesValidation, $this->DATA_BETWEEN, $this->checkNextDataTag)) $this->excludedItemFound = true;
                 $this->checkNextData = false;
                 $this->checkNextDataTag = '';
             }
             $this->dataHandler(null, "</{$tag}>");
             $this->DATA_BETWEEN = '';
+            //$this->PAYLOAD_TEMP = $this->PAYLOAD_TEMP . "".$this->DATA_BETWEEN . "</{$tag}>\n";
             if ($this->CHUNKON == $tag) {
                 $this->logging("Closing ".$this->CHUNKON." element found");
 
@@ -233,6 +251,10 @@ if(!class_exists("Chunker")){
          * @param string $data The data to be handled
          */
         private function dataHandler($xml, $data) {
+            //GLOBAL $PAYLOAD;
+
+            
+
             $this->DATA_BETWEEN .= $data;
             $this->PAYLOAD_TEMP .= $data;
         }
@@ -259,6 +281,7 @@ if(!class_exists("Chunker")){
             xml_set_character_data_handler($CURRXML, [$this, 'dataHandler']);
             xml_set_default_handler($CURRXML, [$this, 'defaultHandler']);
             if ($bareXML) {
+                /*xml_parse($CURRXML, '<?xml version="1.0" encoding="'.$this->CHARSET.'"?>', 0);*/
                 xml_parse($CURRXML, '<?xml version="1.0" encoding="'.$CHARSET.'"?>', 0);
             }
             $this->logging("Created XML Parser");
@@ -274,6 +297,9 @@ if(!class_exists("Chunker")){
          * @return string The main log that was created during the chunking
          */
         public function chunkXML($mainTag = 'shopItem', $rootTag = 'Shop', $charset = "UTF-8") {
+            //GLOBAL $CHUNKON, $CHUNKS, $ITEMLIMIT;
+            
+            // Every chunk only holds $ITEMLIMIT "$CHUNKON" elements at most.
             $this->rootTag = $rootTag;
             $this->CHARSET = $charset;
             $this->CHUNKON = $mainTag;
@@ -296,6 +322,7 @@ if(!class_exists("Chunker")){
             $this->PAYLOAD_TEMP = '';
             $this->DATA_BETWEEN = '';
             while(!feof($fp)) {
+                //$this->logging("Reading new line...");
                 $chunk = fgets($fp, 102400);
                 $this->logging("Reading line: " .$chunk);
                 if(!$chunk){
