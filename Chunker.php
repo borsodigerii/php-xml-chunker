@@ -9,6 +9,7 @@ if(!class_exists("Chunker")){
      * 
      * @author Borsodi Gergő
      * @version 1.0
+     * @link https://github.com/borsodigerii/php-xml-chunker
      * 
      */
     class Chunker{
