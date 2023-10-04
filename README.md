@@ -4,6 +4,8 @@ The main goal of this library is to create chunks with predefined sizes from a b
 
 The algorithm was written using the XMLParser php library, which is capable of parsing an XML file line to line (or tag to tag) without state-control, and not by a string to string comparison or simple I/O operations. This attribute of the library makes it possible to implement validation on the said tags, everytime they are parsed.
 
+With the correct charset specified, it can handle special characters, and also parse them for validation.
+
 ## Usage
 ### Simple Chunking
 The implementation is Object-oriented, so in order to split the files, an instance of Chunker has to be created first.
