@@ -1,1 +1,4 @@
-/output-*.xml
+/*.xml
+/*.log
+/index.php
+/sapho-chunking.php

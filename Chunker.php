@@ -11,10 +11,11 @@ if(!class_exists("Chunker")){
     class Chunker{
 
         private string $xmlFile;
-        private readonly int $chunkSize;
+        private int $chunkSize;
         private int $CHUNKS;
         private string $PAYLOAD = '';
         private string $PAYLOAD_TEMP = '';
+        private string $DATA_BETWEEN = '';
         private string $rootTag;
         private string $CHARSET;
         private string $outputFilePrefix;
@@ -64,15 +65,17 @@ if(!class_exists("Chunker")){
                 return;
             }
             $xp = fopen($file = $this->outputFilePrefix . "" . $this->CHUNKS . ".xml", "w");
-            fwrite($xp, '<?xml version="1.0" encoding="'.$this->CHARSET.'"?>'."\n");
+            /*fwrite($xp, '<?xml version="1.0" encoding="'.$this->CHARSET.'"?>'."\n");*/
+            fwrite($xp, '<?xml version="1.0" encoding="'.strtolower($this->CHARSET).'"?>'."\n");
                 fwrite($xp, '<'.$this->rootTag.' xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">');
                     fwrite($xp, $this->PAYLOAD);
-                $lastChunk || fwrite($xp, "</'.$this->rootTag.'>");
+                $lastChunk || fwrite($xp, "</".$this->rootTag.">");
             fclose($xp);
             $this->logging("Written {$file}");
             $this->CHUNKS++;
             $this->PAYLOAD = '';
             $this->PAYLOAD_TEMP = '';
+            $this->DATA_BETWEEN = '';
             $this->excludedItemFound = false;
             $this->checkNextData = false;
             $this->checkNextDataTag = '';
@@ -115,7 +118,16 @@ if(!class_exists("Chunker")){
         private function endElement($xml, $tag) {
             //GLOBAL $CHUNKON, $ITEMCOUNT, $ITEMLIMIT;
             //$this->logging("New closing element: " .$tag);
+            if($this->checkNextData && $this->checkNextDataTag == $tag){
+                // ezt az adatot validalni kell
+                //if(!$this->passesValidation($data, $this->checkNextDataTag)) $this->excludedItemFound = true;
+                if(!call_user_func($this->passesValidation, $this->DATA_BETWEEN, $this->checkNextDataTag)) $this->excludedItemFound = true;
+                $this->checkNextData = false;
+                $this->checkNextDataTag = '';
+            }
             $this->dataHandler(null, "</{$tag}>");
+            $this->DATA_BETWEEN = '';
+            //$this->PAYLOAD_TEMP = $this->PAYLOAD_TEMP . "".$this->DATA_BETWEEN . "</{$tag}>\n";
             if ($this->CHUNKON == $tag) {
                 $this->logging("Closing ".$this->CHUNKON." element found");
 
@@ -123,6 +135,7 @@ if(!class_exists("Chunker")){
                     // volt nem passzolo item
                     $this->logging("Excluded item found, skipping current " .$this->CHUNKON."..");
                     $this->PAYLOAD_TEMP = '';
+                    $this->DATA_BETWEEN = '';
                     $this->excludedItemFound = false;
                     $this->checkNextData = false;
                     $this->checkNextDataTag = '';
@@ -130,6 +143,7 @@ if(!class_exists("Chunker")){
                 }
                 $this->PAYLOAD .= $this->PAYLOAD_TEMP;
                 $this->PAYLOAD_TEMP = '';
+                $this->DATA_BETWEEN = '';
                 $this->totalItems++;
                 if (++$this->ITEMCOUNT >= $this->chunkSize) {
                     $this->logging("Chunk limit reached, printing chunk...");
@@ -146,14 +160,9 @@ if(!class_exists("Chunker")){
         private function dataHandler($xml, $data) {
             //GLOBAL $PAYLOAD;
 
-            if($this->checkNextData){
-                // ezt az adatot validalni kell
-                //if(!$this->passesValidation($data, $this->checkNextDataTag)) $this->excludedItemFound = true;
-                if(!call_user_func($this->passesValidation, $data, $this->checkNextDataTag)) $this->excludedItemFound = true;
-                $this->checkNextData = false;
-                $this->checkNextDataTag = '';
-            }
+            
 
+            $this->DATA_BETWEEN .= $data;
             $this->PAYLOAD_TEMP .= $data;
         }
         
@@ -162,6 +171,7 @@ if(!class_exists("Chunker")){
          */
         private function defaultHandler($xml, $data) {
             // a.k.a. Wild Text Fallback Handler, or WTFHandler for short.
+            $this->logging("WTF text found: " .$data);
         }
 
         /**
@@ -178,7 +188,8 @@ if(!class_exists("Chunker")){
             xml_set_character_data_handler($CURRXML, [$this, 'dataHandler']);
             xml_set_default_handler($CURRXML, [$this, 'defaultHandler']);
             if ($bareXML) {
-                xml_parse($CURRXML, '<?xml version="1.0" encoding="'.$this->CHARSET.'"?>', 0);
+                /*xml_parse($CURRXML, '<?xml version="1.0" encoding="'.$this->CHARSET.'"?>', 0);*/
+                xml_parse($CURRXML, '<?xml version="1.0" encoding="'.$CHARSET.'"?>', 0);
             }
             $this->logging("Created XML Parser");
             return $CURRXML;
@@ -194,13 +205,14 @@ if(!class_exists("Chunker")){
          */
         public function chunkXML($mainTag = 'shopItem', $rootTag = 'Shop', $charset = "UTF-8") {
             //GLOBAL $CHUNKON, $CHUNKS, $ITEMLIMIT;
-   
+            
             // Every chunk only holds $ITEMLIMIT "$CHUNKON" elements at most.
             $this->rootTag = $rootTag;
             $this->CHARSET = $charset;
             $this->CHUNKON = $mainTag;
             
             $this->logging("Starting new Chunking.*****", true);
+            $this->logging("Internal encoding: " .print_r(iconv_get_encoding(), true));
             $xml = $this->createXMLParser($this->CHARSET, false);
             
             $fp = fopen($this->xmlFile, 'r');
@@ -215,9 +227,11 @@ if(!class_exists("Chunker")){
             $this->checkNextDataTag = '';
             $this->PAYLOAD = '';
             $this->PAYLOAD_TEMP = '';
+            $this->DATA_BETWEEN = '';
             while(!feof($fp)) {
                 //$this->logging("Reading new line...");
-                $chunk = fgets($fp, 10240);
+                $chunk = fgets($fp, 102400);
+                $this->logging("Reading line: " .$chunk);
                 if(!$chunk){
                     $this->logging("Reading new line failed, next try");
                 }
@@ -230,15 +244,16 @@ if(!class_exists("Chunker")){
    
             // Now, it is possible that one last chunk is still queued for processing.
             $this->processChunk(true);
+            $this->logging("Internal encoding: " .print_r(iconv_get_encoding(), true));
             $this->logging("Ended chunking. Total processed '" .$this->CHUNKON."' objects: " .$this->totalItems);
-            return nl2br($this->log);
+            return $this->log;
         }
         /**
          * Used for administrative purposes. A message can be logged into the internal logging variable, and then later be returned/passed back as value by some functions.
          * @param string $msg The message to be logged
          * @param bool $start Indicates if the logging has to be started over (so the past logged messages will be deleted, and a cleared loggin variable will be set). **Default: false**
          */
-        private function logging($msg, $start = false){
+        public function logging($msg, $start = false){
 
             if($start){
                 $this->log = "[" .(new DateTime())->format("y:m:d h:i:s"). "] " .$msg. "\n\r";
@@ -249,6 +264,13 @@ if(!class_exists("Chunker")){
         }
     }
 
+}
+
+if (!function_exists('str_contains')) {
+    function str_contains(string $haystack, string $needle): bool
+    {
+        return '' === $needle || false !== strpos($haystack, $needle);
+    }
 }
 
 ?>
