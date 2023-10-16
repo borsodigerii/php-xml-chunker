@@ -1,5 +1,9 @@
 # Chunker - A lightweight, glazing fast XML splitter written in PHP
 
+![GitHub Workflow Status (with event)](https://img.shields.io/github/actions/workflow/status/borsodigerii/php-xml-chunker/php.yml) ![GitHub](https://img.shields.io/github/license/borsodigerii/php-xml-chunker) ![GitHub release (with filter)](https://img.shields.io/github/v/release/borsodigerii/php-xml-chunker)
+
+
+
 The main goal of this library is to create chunks with predefined sizes from a big XML file (or to 'split' it into multiple chunks, so to say).
 
 The algorithm was written using the XMLParser php library, which is capable of parsing an XML file line to line (or tag to tag) without state-control, and not by a string to string comparison or simple I/O operations. This attribute of the library makes it possible to implement validation on the said tags, everytime they are parsed.
