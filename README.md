@@ -6,6 +6,22 @@ The algorithm was written using the XMLParser php library, which is capable of p
 
 With the correct charset specified, it can handle special characters, and also parse them for validation.
 
+## Installing
+You can use this library by downloading the `src\Chunker.php` file, and using it directly, or by **using composer** as your package manager:
+```bash
+$ composer require borsodigerii/php-xml-chunker
+```
+
+Alternatively, you can add this library as a dependency in your `composer.json` file:
+```json
+"require": {
+    "borsodigerii/php-xml-chunker": "2.0.0"
+}
+```
+Then you just have to run `composer update`.
+
+The minimum PHP version for this library to work, is **>= 7.4.0**
+
 ## Usage
 ### Simple Chunking
 The implementation is Object-oriented, so in order to split the files, an instance of Chunker has to be created first.
@@ -20,7 +36,7 @@ $validationFunction = fn($data, $tag) => {
 }
 $checkingTags = array();
 
-$chunker = new Chunker($xmlfile, $chunkSize, $outputFilePrefix, $validationFunction, $checkingTags);
+$chunker = new Chunker\Chunker($xmlfile, $chunkSize, $outputFilePrefix, $validationFunction, $checkingTags);
 ```
 
 
@@ -88,7 +104,7 @@ function validation($data, $tag) {
 $mainTag = "shopItem";
 $rootTag = "Shop";
 
-$chunker = new Chunker($xmlfile, $chunkSize, $outPrefix, "validation", $chekingTags);
+$chunker = new Chunker\Chunker($xmlfile, $chunkSize, $outPrefix, "validation", $chekingTags);
 $chunker.chunkXML($mainTag, $rootTag);
 ```
 
