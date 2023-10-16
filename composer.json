@@ -1,0 +1,30 @@
+{
+    "name": "borsodigerii/php-xml-chunker",
+    "description": "A lightweight, fast, and optimized XML file splitter with build in tag data validation, written with the XMLParser library. The main goal of this is to split an XML file into multiple small chunks (hence the name), then save it into multiple different little XML files.",
+    "keywords": [
+        "fast", "lightweight", "php", "php7", "xml", "split", "xml-parsing", "xml-parser", "charset", "splitter", "chunking", "xml-parser-library", "php8", "charset-normalizer", "xml-parser-lib"
+    ],
+    "type": "library",
+    "license": "MIT",
+    "homepage": "https://github.com/borsodigerii/php-xml-chunker",
+    "readme": "https://github.com/borsodigerii/php-xml-chunker/blob/main/README.md",
+    "authors": [{
+        "name": "Borsodi Gergő",
+        "email": "borsodi.geri30@gmail.com",
+        "homepage": "https://borsodigerii.hu"
+    }],
+    "require": {
+        "php": ">=7.4.0"
+    },
+    "require-dev": {},
+    "support": {
+        "issues": "https://github.com/borsodigerii/php-xml-chunker/issues",
+        "source": "https://github.com/borsodigerii/php-xml-chunker"
+    },
+    "autoload": {
+        "psr-0": {
+            "Chunker": "src/"
+        }
+    },
+    "autoload-dev": {}
+}

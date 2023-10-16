@@ -1,5 +1,9 @@
 <?php 
 
+namespace Chunker;
+use \Datetime;
+use \XMLParser;
+
 if(!class_exists("Chunker")){
 
     /**
@@ -8,7 +12,7 @@ if(!class_exists("Chunker")){
      * MINIMUM PHP VERSION: 7.4
      * 
      * @author Borsodi Gergő
-     * @version 1.0
+     * @version 2.0
      * @link https://github.com/borsodigerii/php-xml-chunker
      * 
      */

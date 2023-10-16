@@ -2,3 +2,5 @@
 /*.log
 /index.php
 /sapho-chunking.php
+/Chunker-DEV.php
+/vendor/
