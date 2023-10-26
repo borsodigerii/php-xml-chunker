@@ -91,7 +91,27 @@ It is really helpful, when something is not working for your needs, and has to b
 
 ### Basic validation
 
-Lets say, that you have an XML file (*"feed.xml"*) with a **Shop** root element, and multiple **shopItem** elements inside it (10.000+). You want it to split into files named *"feed-{chunk}.xml"* containing 1000 **shopItem**s maximum. And you also want to only include **shopItem**s, that has a *weight_kg* tag inside, which can only be greater than 10 (or '10 kgs'). The solution is like the following:
+Lets say, that you have an XML file (*"feed.xml"*) with a **Shop** root element, and multiple **shopItem** elements inside it (10.000+):
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<Shop>
+    <...>
+    <shopItem>
+        <...>
+        <weight_kg>5</weight_kg>
+        <...>
+    </shopItem>
+    <shopItem>
+        <...>
+        <weight_kg>12</weight_kg>
+        <...>
+    </shopItem>
+    <...>
+</Shop>
+```
+
+You want it to split into files named *"feed-{chunk}.xml"* containing 1000 **shopItem**s maximum. And you also want to only include **shopItem**s, that has a *weight_kg* tag inside, which can only be greater than 10 (or '10 kgs'). The solution is like the following:
 
 ```php
 $chunkSize = 1000; // Max. 1000 shopItems per chunk
