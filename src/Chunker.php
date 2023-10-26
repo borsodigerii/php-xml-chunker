@@ -12,7 +12,7 @@ if(!class_exists("Chunker")){
      * MINIMUM PHP VERSION: 7.4
      * 
      * @author Borsodi Gergő
-     * @version 2.0
+     * @version 2.0.1
      * @link https://github.com/borsodigerii/php-xml-chunker
      * 
      */
@@ -336,6 +336,8 @@ if(!class_exists("Chunker")){
 
 }
 
+
+// This function is for backward compatibility (in PHPv7.4 str_contains function was not yet implemented in the standard library)
 if (!function_exists('str_contains')) {
     function str_contains(string $haystack, string $needle): bool
     {
