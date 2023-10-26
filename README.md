@@ -102,7 +102,7 @@ $checkingTags = array("weight_kg"); // Tags to be validated (to which the valida
 // validation function
 function validation($data, $tag) {
     if($tag == "weight_kg"){
-        if(!empty($data) && intval($data) > 0) return true;
+        if(!empty($data) && intval($data) > 10) return true;
     }
     return false;
 }
