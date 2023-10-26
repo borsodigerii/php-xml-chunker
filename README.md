@@ -94,10 +94,12 @@ It is really helpful, when something is not working for your needs, and has to b
 Lets say, that you have an XML file (*"feed.xml"*) with a **Shop** root element, and multiple **shopItem** elements inside it (10.000+). You want it to split into files named *"feed-{chunk}.xml"* containing 1000 **shopItem**s maximum. And you also want to only include **shopItem**s, that has a *weight_kg* tag inside, which can only be greater than 10 (or '10 kgs'). The solution is like the following:
 
 ```php
-$chunkSize = 1000;
-$xmlfile = "feed.xml";
-$outPrefix = "feed-";
-$checkingTags = array("weight_kg");
+$chunkSize = 1000; // Max. 1000 shopItems per chunk
+$xmlfile = "feed.xml"; // Input file
+$outPrefix = "feed-"; // Prefix for chunk-files
+$checkingTags = array("weight_kg"); // Tags to be validated (to which the validation function will be called)
+
+// validation function
 function validation($data, $tag) {
     if($tag == "weight_kg"){
         if(!empty($data) && intval($data) > 0) return true;
@@ -105,9 +107,13 @@ function validation($data, $tag) {
     return false;
 }
 
+// Tags to be counted with $chunkSize
 $mainTag = "shopItem";
+
+// Root tag/element, that is only present once in the xml file
 $rootTag = "Shop";
 
+// Creating the chunker instance, and running the Chunker
 $chunker = new Chunker\Chunker($xmlfile, $chunkSize, $outPrefix, "validation", $chekingTags);
 $chunker.chunkXML($mainTag, $rootTag);
 ```
